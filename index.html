@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Kho Xe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; color: #1f2937; }
+        .container { max-width: 1600px; margin-left: auto; margin-right: auto; padding: 20px; }
+        .card { background-color: #ffffff; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); padding: 24px; margin-bottom: 24px; }
+        input[type="text"], input[type="number"], input[type="password"], input[type="date"], select, textarea { width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 0.5rem; margin-top: 4px; margin-bottom: 16px; box-sizing: border-box; transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out; }
+        input[type="text"]:focus, input[type="number"]:focus, input[type="password"]:focus, input[type="date"]:focus, select:focus, textarea:focus { border-color: #4f46e5; outline: none; box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.3); }
+        label { display: block; margin-bottom: 2px; font-weight: 500; color: #374151; }
+        button { padding: 10px 20px; border-radius: 0.5rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out; display: inline-flex; align-items: center; justify-content: center; }
+        button:active { transform: scale(0.98); }
+        .btn-primary { background-color: #4f46e5; color: #ffffff; border: 1px solid #4f46e5; }
+        .btn-primary:hover { background-color: #4338ca; }
+        .btn-danger { background-color: #ef4444; color: #ffffff; border: 1px solid #ef4444; }
+        .btn-danger:hover { background-color: #dc2626; }
+        .btn-outline { background-color: transparent; color: #4f46e5; border: 1px solid #4f46e5; }
+        .btn-outline:hover { background-color: #e0e7ff; }
+        .btn-secondary { background-color: #6b7280; color: #ffffff; border: 1px solid #6b7280; }
+        .btn-secondary:hover { background-color: #4b5563; }
+        .tab-button { padding: 12px 24px; border-radius: 0.5rem 0.5rem 0 0; background-color: transparent; color: #4b5563; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; margin-right: 8px; }
+        .tab-button.active { color: #4f46e5; border-bottom: 3px solid #4f46e5; background-color: #ffffff; }
+        .table-container { overflow-x: auto; background-color: #fff; border-radius: 0.5rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #e5e7eb; white-space: nowrap; }
+        th { background-color: #f9fafb; font-weight: 600; color: #374151; text-transform: uppercase; font-size: 0.8rem; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background-color: #f0f9ff; }
+        .message-box { position: fixed; top: 20px; right: 20px; padding: 16px; border-radius: 0.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1050; font-weight: 500; display: none; opacity: 0; transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; transform: translateY(-20px); }
+        .message-box.show { display: block; opacity: 1; transform: translateY(0); }
+        .message-box.success { background-color: #d1fae5; color: #065f46; border-left: 4px solid #10b981; }
+        .message-box.error { background-color: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; padding: 20px; }
+        .modal-content { background-color: #ffffff; margin: auto; padding: 24px; border-radius: 0.75rem; width: 100%; max-width: 900px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 20px 40px -20px rgba(0,0,0,0.2); position: relative; animation: fadeInModal 0.3s ease-out; }
+        @keyframes fadeInModal { from { opacity: 0; transform: scale(0.95) translateY(-10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .close-button { position: absolute; top: 16px; right: 16px; color: #9ca3af; font-size: 24px; line-height: 1; font-weight: bold; cursor: pointer; background: none; border: none; padding: 0; }
+        .close-button:hover { color: #1f2937; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+        .form-grid-col-span-2 { grid-column: span 2 / span 2; }
+        @media (max-width: 768px) { .form-grid-col-span-2 { grid-column: span 1 / span 1; } }
+        .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 36px; height: 36px; border-radius: 50%; border-left-color: #4f46e5; animation: spin 1s ease infinite; margin: 20px auto; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .hidden { display: none; }
+        .admin-only { }
+        .superadmin-only { display: none; }
+        .status-badge { padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; display: inline-block; text-align: center; min-width: 100px; }
+        .status-con-hang { background-color: #d1fae5; color: #065f46; }
+        .status-da-ghep { background-color: #fef3c7; color: #92400e; }
+        .status-da-ban { background-color: #fee2e2; color: #991b1b; }
+        .filter-input { padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem; margin-bottom: 0; }
+        .filter-input:focus { border-color: #4f46e5; outline: none; box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.3); }
+        .autocomplete-container { position: relative; }
+        .autocomplete-suggestions { position: absolute; border: 1px solid #d1d5db; border-top: none; z-index: 99; top: 100%; left: 0; right: 0; background-color: white; max-height: 200px; overflow-y: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 0 0 0.5rem 0.5rem; }
+        .autocomplete-item { padding: 10px; cursor: pointer; }
+        .autocomplete-item:hover { background-color: #eef2ff; }
+    </style>
+</head>
+<body>
+    <div id="messageBox" class="message-box"></div>
+
+    <div id="loginPage" class="flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-100 to-purple-100 p-4">
+        <div class="card w-full max-w-md p-8">
+            <h2 class="text-3xl font-bold text-center mb-2 text-indigo-600">Đăng nhập Hệ Thống</h2>
+            <p class="text-center text-gray-600 mb-8">Quản lý kho xe và đơn hàng hiệu quả.</p>
+            <div>
+                <label for="username">Tên đăng nhập:</label>
+                <input type="text" id="username" placeholder="ví dụ: admin">
+            </div>
+            <div>
+                <label for="password">Mật khẩu:</label>
+                <input type="password" id="password" placeholder="Nhập mật khẩu">
+            </div>
+            <div class="mt-4 mb-6 flex items-center">
+                <input id="rememberMe" name="remember-me" type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                <label for="rememberMe" class="ml-2 block text-sm text-gray-700">Lưu tài khoản</label>
+            </div>
+            <button id="loginButton" class="btn-primary w-full py-3 text-lg">
+                <i class="fas fa-spinner fa-spin mr-2 hidden" id="loginSpinner"></i>
+                Đăng nhập
+            </button>
+        </div>
+    </div>
+
+    <div id="appPage" class="container hidden">
+        <header class="flex justify-between items-center py-4 mb-6 border-b border-gray-200">
+            <h1 class="text-3xl font-bold text-indigo-700">Hệ Thống Quản Lý Kho Xe</h1>
+            <div>
+                <span id="currentUserDisplay" class="text-gray-700 mr-4"></span>
+                <button id="logoutButton" class="btn-outline">
+                    <i class="fas fa-sign-out-alt mr-2"></i>
+                    Đăng xuất
+                </button>
+            </div>
+        </header>
+
+        <nav class="mb-8">
+            <button id="tabVehicles" class="tab-button active">
+                <i class="fas fa-car mr-2"></i>
+                Quản Lý Xe
+            </button>
+            <button id="tabOrders" class="tab-button">
+                <i class="fas fa-file-invoice-dollar mr-2"></i>
+                Quản Lý Đơn Hàng
+            </button>
+            <button id="tabDocuments" class="tab-button">
+                <i class="fas fa-file-alt mr-2"></i>
+                📄 In Văn Bản
+            </button>
+            <button id="tabAdmin" class="tab-button">
+                <i class="fas fa-user-shield mr-2"></i>
+                Admin Dashboard
+            </button>
+        </nav>
+
+        <main>
+            <div id="loadingSpinner" class="spinner hidden"></div>
+
+            <div id="vehiclesTabContent" class="tab-content">
+                 <p class="text-gray-600 mb-6 text-lg">Khu vực này cho phép bạn xem, thêm mới, cập nhật và xóa thông tin các xe trong kho. Admin có toàn quyền quản lý, người xem chỉ có thể xem danh sách.</p>
+                <div id="vehicleFormCard" class="card">
+                    <h2 class="text-2xl font-semibold text-indigo-600 mb-6">Thêm / Cập nhật Xe</h2>
+                    <form id="vehicleForm">
+                        <div class="form-grid">
+                            <div><label for="chassisNumber">Số Khung:</label><input type="text" id="chassisNumber" placeholder="Số khung (VIN)" required></div>
+                            <div><label for="vehicleName">Tên Xe:</label><input type="text" id="vehicleName" placeholder="VD: VF9 Plus 7_nt Nâu" required></div>
+                            <div><label for="vehicleColor">Màu Sắc:</label><input type="text" id="vehicleColor" placeholder="VD: Trắng"></div>
+                            <div><label for="manufacturingYear">Năm Sản Xuất:</label><input type="number" id="manufacturingYear" placeholder="VD: 2025"></div>
+                            <div><label for="engineNumber">COC:</label><input type="text" id="engineNumber" placeholder="Vị trí COC"></div>
+                            <div><label for="importPrice">Giá Nhập (VNĐ):</label><input type="number" id="importPrice" placeholder="Giá nhập kho" step="1000"></div>
+                            <div>
+                                <label for="vehicleStatus">Trạng Thái Xe:</label>
+                                <select id="vehicleStatus">
+                                    <option value="Còn hàng">Còn hàng</option>
+                                    <option value="Đã Ghép">Đã Ghép</option>
+                                    <option value="Đã bán">Đã bán</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="flex space-x-4 mt-6 admin-only">
+                            <button type="submit" class="btn-primary flex-1 py-2.5">
+                                <i class="fas fa-save mr-2"></i>
+                                Lưu Xe
+                            </button>
+                            <button type="button" id="clearVehicleForm" class="btn-outline flex-1 py-2.5">
+                                <i class="fas fa-times mr-2"></i>
+                                Xóa Form
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card mt-8">
+                    <h2 class="text-2xl font-semibold text-indigo-600 mb-4">Danh sách Xe Trong Kho</h2>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-8 gap-4 mb-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                        <div><label for="filterChassisNumber" class="text-xs font-medium">Lọc Số Khung:</label><input type="text" id="filterChassisNumber" class="filter-input" placeholder="Nhập số khung..."></div>
+                        <div><label for="filterVehicleName" class="text-xs font-medium">Lọc Tên Xe:</label><input type="text" id="filterVehicleName" class="filter-input" placeholder="Nhập tên xe..."></div>
+                        <div><label for="filterVehicleColor" class="text-xs font-medium">Lọc Màu Sắc:</label><input type="text" id="filterVehicleColor" class="filter-input" placeholder="Nhập màu..."></div>
+                        <div><label for="filterManYear" class="text-xs font-medium">Lọc Năm SX:</label><input type="text" id="filterManYear" class="filter-input" placeholder="Nhập năm..."></div>
+                        <div><label for="filterCoc" class="text-xs font-medium">Lọc COC:</label><input type="text" id="filterCoc" class="filter-input" placeholder="Nhập COC..."></div>
+                        <div>
+                            <label for="filterVehicleStatus" class="text-xs font-medium">Lọc Trạng Thái:</label>
+                            <select id="filterVehicleStatus" class="filter-input w-full">
+                                <option value="">Tất cả</option>
+                                <option value="Còn hàng">Còn hàng</option>
+                                <option value="Đã Ghép">Đã Ghép</option>
+                                <option value="Đã bán">Đã bán</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="filterActualInventory" class="text-xs font-medium">Tồn Thực Tế:</label>
+                            <select id="filterActualInventory" class="filter-input w-full">
+                                <option value="">Tất cả</option>
+                                <option value="có">Có</option>
+                                <option value="không">Không</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs font-medium block opacity-0">.</label>
+                            <button id="clearVehicleFilters" class="btn-outline text-xs py-2 w-full">
+                                <i class="fas fa-times mr-1"></i> Xóa Lọc
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table id="vehiclesTable">
+                            <thead>
+                                <tr>
+                                    <th>Số Khung</th><th>Tên Xe</th><th>Màu Sắc</th><th>Năm SX</th>
+                                    <th>COC</th><th>Giá Nhập</th><th>Trạng Thái Xe</th>
+                                    <th>Tồn Thực Tế?</th>
+                                    <th class="admin-only">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                     <div id="noVehiclesMessage" class="text-center py-8 text-gray-500 hidden">Không có xe nào trong kho.</div>
+                </div>
+            </div>
+
+            <div id="ordersTabContent" class="tab-content hidden">
+                 <p class="text-gray-600 mb-6 text-lg">Khu vực này cho phép bạn quản lý các đơn hàng, bao gồm việc tạo mới, cập nhật thông tin, và quan trọng nhất là ghép một chiếc xe cụ thể từ kho vào đơn hàng. Admin có toàn quyền quản lý.</p>
+                 <div id="orderFormCard" class="card">
+                    <h2 class="text-2xl font-semibold text-indigo-600 mb-6">Thêm / Cập nhật Đơn Hàng</h2>
+                    <form id="orderForm">
+                        <div class="form-grid">
+                            <div class="autocomplete-container">
+                                <label for="orderChassisNumberInput">Số Khung Xe:</label>
+                                <input type="text" id="orderChassisNumberInput" placeholder="Nhập để tìm Số Khung..." required autocomplete="off">
+                                <div id="chassisAutocompleteSuggestions" class="autocomplete-suggestions hidden"></div>
+                            </div>
+
+                            <div><label for="orderCode">Mã Đơn Hàng:</label><input type="text" id="orderCode" placeholder="VD: S10601-VSO-25-26-0222" required></div>
+                            <div><label for="vsoCode">Mã Báo Gía:</label><input type="text" id="vsoCode" placeholder="Mã báo giá (nếu có)"></div>
+                            <div><label for="customerName">Tên Khách Hàng:</label><input type="text" id="customerName" placeholder="Nguyễn Văn A" required></div>
+                            <div><label for="customerPhone">SĐT Khách Hàng:</label><input type="text" id="customerPhone" placeholder="09xxxxxxxx"></div>
+                            <div><label for="customerIDNumber">CCCD/CMND/MST KH:</label><input type="text" id="customerIDNumber" placeholder="Số định danh"></div>
+                            <div class="form-grid-col-span-2"><label for="customerAddress">Địa chỉ Khách Hàng:</label><input type="text" id="customerAddress" placeholder="Địa chỉ chi tiết"></div>
+
+                            <div><label for="salesConsultant">Tư Vấn BH:</label><input type="text" id="salesConsultant" placeholder="Trần Thị B"></div>
+                            <div><label for="showroomName">Tên Showroom:</label><input type="text" id="showroomName" placeholder="Showroom Chính"></div>
+
+                            <div><label for="sellingPrice">Giá Niêm Yết (VNĐ):</label><input type="number" id="sellingPrice" placeholder="Giá niêm yết" step="1000"></div>
+                            <div><label for="depositAmount">Tiền Cọc (VNĐ):</label><input type="number" id="depositAmount" placeholder="Số tiền đã cọc" step="1000"></div>
+                            <div><label for="discountAmount">Giảm Giá (VNĐ):</label><input type="number" id="discountAmount" placeholder="Số tiền giảm giá" step="1000"></div>
+                            <div><label for="finalPrice">Giá Cuối Cùng (VNĐ):</label><input type="number" id="finalPrice" placeholder="Giá sau giảm giá" step="1000"></div>
+
+                            <div class="form-grid-col-span-2"><label for="accessoriesPackage">Gói Phụ Kiện:</label><textarea id="accessoriesPackage" placeholder="Liệt kê phụ kiện và giá, ví dụ: Film cách nhiệt: 5.000.000 VNĐ, Lót sàn: 2.000.000 VNĐ" rows="3"></textarea></div>
+
+                            <div>
+                                <label for="paymentStatus">TT Thanh Toán:</label>
+                                <select id="paymentStatus" required>
+                                    <option value="">-- Chọn trạng thái --</option>
+                                    <option value="Chưa cọc">Chưa cọc</option>
+                                    <option value="Đã cọc">Đã cọc</option>
+                                    <option value="Đang chờ giải ngân">Đang chờ giải ngân</option>
+                                    <option value="Đã thanh toán">Đã thanh toán</option>
+                                </select>
+                            </div>
+                            <div><label for="invoiceDate">Ngày Xuất HĐ:</label><input type="date" id="invoiceDate"></div>
+                            <div><label for="expectedDisbursementDate">Ngày DKGN:</label><input type="date" id="expectedDisbursementDate"></div>
+                            <div><label for="actualDeliveryDate">Ngày Giao Xe TT:</label><input type="date" id="actualDeliveryDate"></div>
+
+                            <div class="form-grid-col-span-2"><label for="orderNotes">Ghi Chú ĐH:</label><textarea id="orderNotes" placeholder="Thông tin thêm về đơn hàng" rows="3"></textarea></div>
+                        </div>
+                        <div class="flex space-x-4 mt-6 admin-only">
+                            <button type="submit" class="btn-primary flex-1 py-2.5"> <i class="fas fa-save mr-2"></i> Lưu Đơn Hàng </button>
+                            <button type="button" id="clearOrderForm" class="btn-outline flex-1 py-2.5"> <i class="fas fa-times mr-2"></i> Xóa Form </button>
+                        </div>
+                    </form>
+                </div>
+                 <div class="card mt-8">
+                    <h2 class="text-2xl font-semibold text-indigo-600 mb-6">Danh sách Đơn Hàng Đã Ghép Xe</h2>
+                    <div class="table-container">
+                        <table id="ordersTable">
+                            <thead>
+                                <tr>
+                                    <th>Số Khung Xe</th>
+                                    <th>Tên Xe</th>
+                                    <th>Trạng Thái Xe</th>
+                                    <th>Mã Đơn Hàng</th>
+                                    <th>Tên Khách Hàng</th>
+                                    <th>Tư vấn BH</th>
+                                    <th>Tiền Cọc</th>
+                                    <th>Giá Cuối Cùng</th>
+                                    <th>TT Thanh Toán</th>
+                                    <th>Ngày Xuất HĐ</th>
+                                    <th>Ngày DKGN</th>
+                                    <th>Ngày Giao TT</th>
+                                    <th class="admin-only">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div id="noOrdersMessage" class="text-center py-8 text-gray-500 hidden">Chưa có đơn hàng nào được ghép xe.</div>
+                </div>
+            </div>
+
+            <div id="documentsTabContent" class="tab-content hidden">
+                <p class="text-gray-600 mb-6 text-lg">Khu vực này cho phép bạn tạo các văn bản (ví dụ: hợp đồng, đề nghị) dựa trên thông tin đơn hàng đã có, sử dụng các mẫu văn bản được định sẵn.</p>
+                <div class="card">
+                    <h2 class="text-2xl font-semibold text-indigo-600 mb-6">Tạo Văn Bản từ Mẫu Theo Đơn Hàng</h2>
+                    <div class="form-grid">
+                        <div>
+                            <label for="selectOrderForDoc">Chọn Đơn Hàng (theo Mã ĐH):</label>
+                            <select id="selectOrderForDoc">
+                                <option value="">-- Vui lòng chọn đơn hàng --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="selectDocTemplate">Chọn Mẫu Văn Bản:</label>
+                            <select id="selectDocTemplate">
+                                <option value="">-- Vui lòng chọn mẫu --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-6 admin-only">
+                        <button id="generateDocumentButton" class="btn-primary py-2.5">
+                            <i class="fas fa-cogs mr-2"></i>
+                            Tạo Văn Bản
+                        </button>
+                    </div>
+                    <div id="generatedDocLinkContainer" class="mt-6">
+                        </div>
+                </div>
+            </div>
+
+            <div id="adminTabContent" class="tab-content hidden">
+                <p class="text-gray-600 mb-6 text-lg">Tổng quan số liệu và các chức năng quản trị hệ thống.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="card">
+                        <h3 class="text-xl font-semibold text-indigo-600 mb-3 flex items-center">
+                            <i class="fas fa-warehouse mr-3 text-2xl text-indigo-500"></i>
+                            Tổng Quan Kho Xe
+                        </h3>
+                        <p class="text-gray-700 mb-1">Tổng số xe: <span id="totalVehiclesStat" class="font-bold text-indigo-700 text-lg">Đang tải...</span></p>
+                        <p class="text-gray-700 mb-1">Xe còn hàng: <span id="vehiclesAvailableStat" class="font-bold text-green-600">Đang tải...</span></p>
+                        <p class="text-gray-700 mb-1">Xe đã ghép: <span id="vehiclesPendingStat" class="font-bold text-yellow-600">Đang tải...</span></p>
+                        <p class="text-gray-700">Xe đã bán: <span id="vehiclesSoldStat" class="font-bold text-red-600">Đang tải...</span></p>
+                    </div>
+                    <div class="card">
+                        <h3 class="text-xl font-semibold text-indigo-600 mb-3 flex items-center">
+                            <i class="fas fa-file-invoice-dollar mr-3 text-2xl text-indigo-500"></i>
+                            Tổng Quan Đơn Hàng
+                        </h3>
+                        <p class="text-gray-700 mb-1">Tổng số đơn hàng đã tạo: <span id="totalOrdersStat" class="font-bold text-indigo-700 text-lg">Đang tải...</span></p>
+                        <p class="text-gray-700 mb-1">ĐH chưa cọc: <span id="ordersNotDepositedStat" class="font-bold">Đang tải...</span></p>
+                        <p class="text-gray-700 mb-1">ĐH đã cọc: <span id="ordersDepositedStat" class="font-bold">Đang tải...</span></p>
+                        <p class="text-gray-700 mb-1">ĐH chờ giải ngân: <span id="ordersPendingDisbursementStat" class="font-bold">Đang tải...</span></p>
+                        <p class="text-gray-700">ĐH đã thanh toán: <span id="ordersPaidStat" class="font-bold text-green-600">Đang tải...</span></p>
+                    </div>
+                    <div class="card">
+                        <h3 class="text-xl font-semibold text-indigo-600 mb-3 flex items-center">
+                            <i class="fas fa-hand-holding-usd mr-3 text-2xl text-indigo-500"></i>
+                            Doanh Thu (Ước Tính)
+                        </h3>
+                        <p class="text-gray-700">Tổng doanh thu (xe đã bán/thanh toán): <span id="totalRevenueStat" class="font-bold text-indigo-700 text-2xl">Đang tải...</span></p>
+                        <small class="text-gray-500 italic block mt-2">(Dựa trên "Giá cuối cùng" của các xe có "Mã Đơn Hàng" và ("Trạng Thái Xe" là "Đã bán" hoặc "TT Thanh Toán" là "Đã thanh toán"))</small>
+                    </div>
+                </div>
+
+                <div id="userManagementSection" class="card mt-6 superadmin-only">
+                    <h3 class="text-2xl font-semibold text-purple-600 mb-6 flex items-center">
+                        <i class="fas fa-users-cog mr-3 text-2xl text-purple-500"></i>
+                        Quản Lý Người Dùng (Superadmin)
+                    </h3>
+                    <div class="mb-8 p-6 border border-purple-200 rounded-lg bg-purple-50">
+                        <h4 class="text-xl font-semibold text-purple-700 mb-4">Thêm Người Dùng Mới</h4>
+                        <form id="addUserForm" class="form-grid">
+                            <div>
+                                <label for="newUsername">Tên đăng nhập mới:</label>
+                                <input type="text" id="newUsername" placeholder="Tên đăng nhập" required>
+                            </div>
+                            <div>
+                                <label for="newPassword">Mật khẩu mới:</label>
+                                <input type="password" id="newPassword" placeholder="Ít nhất 6 ký tự" required>
+                            </div>
+                            <div>
+                                <label for="newUserRole">Vai trò:</label>
+                                <select id="newUserRole">
+                                    <option value="viewer">Viewer</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="superadmin">Superadmin</option>
+                                </select>
+                            </div>
+                            <div class="mt-2">
+                                <button type="submit" class="btn-primary bg-purple-600 hover:bg-purple-700 border-purple-600 py-2.5">
+                                    <i class="fas fa-user-plus mr-2"></i>Thêm Người Dùng
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div>
+                        <h4 class="text-xl font-semibold text-purple-700 mb-4">Danh Sách Người Dùng</h4>
+                        <div class="table-container">
+                            <table id="usersTable">
+                                <thead>
+                                    <tr>
+                                        <th>Tên Đăng Nhập</th>
+                                        <th>Vai Trò</th>
+                                        <th>Hành Động</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersTableBody">
+                                    </tbody>
+                            </table>
+                        </div>
+                        <div id="noUsersMessageForAdminList" class="text-center py-6 text-gray-500 hidden">Không có người dùng nào để hiển thị.</div>
+                    </div>
+                </div>
+                </div>
+            </main>
+    </div>
+
+    <div id="confirmationModal" class="modal">
+        <!-- Nội dung modal xác nhận giữ nguyên -->
+    </div>
+
+    <script>
+        // --- Global Variables & Element Selectors ---
+        let allAvailableVehicles = []; 
+        let currentUserRole = null;
+        let currentEditingChassisNumberVehicle = null;
+        let currentEditingChassisNumberOrder = null;
+        const el = (id) => document.getElementById(id);
+        const q = (selector) => document.querySelector(selector);
+        const qAll = (selector) => document.querySelectorAll(selector);
+        const loginPage = el('loginPage');
+        const appPage = el('appPage');
+        const loginButton = el('loginButton');
+        const logoutButton = el('logoutButton');
+        const usernameInput = el('username');
+        const passwordInput = el('password');
+        const currentUserDisplay = el('currentUserDisplay');
+        const loginSpinner = el('loginSpinner');
+        const loadingSpinner = el('loadingSpinner');
+        const tabs = { vehicles: { button: el('tabVehicles'), content: el('vehiclesTabContent') }, orders: { button: el('tabOrders'), content: el('ordersTabContent') }, documents: { button: el('tabDocuments'), content: el('documentsTabContent') }, admin: { button: el('tabAdmin'), content: el('adminTabContent') } };
+        const vehicleForm = el('vehicleForm');
+        const vehiclesTableBody = q('#vehiclesTable tbody');
+        const clearVehicleFormButton = el('clearVehicleForm');
+        const noVehiclesMessage = el('noVehiclesMessage');
+        const orderForm = el('orderForm');
+        const ordersTableBody = q('#ordersTable tbody');
+        const clearOrderFormButton = el('clearOrderForm');
+        const noOrdersMessage = el('noOrdersMessage');
+        const selectOrderForDoc = el('selectOrderForDoc');
+        const selectDocTemplate = el('selectDocTemplate');
+        const generateDocumentButton = el('generateDocumentButton');
+        const generatedDocLinkContainer = el('generatedDocLinkContainer');
+        const totalVehiclesStat = el('totalVehiclesStat');
+        const vehiclesAvailableStat = el('vehiclesAvailableStat');
+        const vehiclesPendingStat = el('vehiclesPendingStat');
+        const vehiclesSoldStat = el('vehiclesSoldStat');
+        const totalOrdersStat = el('totalOrdersStat');
+        const ordersNotDepositedStat = el('ordersNotDepositedStat');
+        const ordersDepositedStat = el('ordersDepositedStat');
+        const ordersPendingDisbursementStat = el('ordersPendingDisbursementStat');
+        const ordersPaidStat = el('ordersPaidStat');
+        const totalRevenueStat = el('totalRevenueStat');
+        const userManagementSection = el('userManagementSection');
+        const addUserForm = el('addUserForm');
+        const newUsernameInput = el('newUsername');
+        const newPasswordInput = el('newPassword');
+        const newUserRoleSelect = el('newUserRole');
+        const usersTableBody = el('usersTableBody');
+        const noUsersMessageForAdminList = el('noUsersMessageForAdminList');
+        const confirmationModal = el('confirmationModal');
+        const confirmationMessage = el('confirmationMessage');
+        const confirmActionBtn = el('confirmAction');
+        const cancelConfirmBtn = el('cancelConfirm');
+        const closeConfirmModalBtn = el('closeConfirmModal');
+        const vehicleFormCard = el('vehicleFormCard');
+        const orderFormCard = el('orderFormCard');
+        const rememberMeCheckbox = el('rememberMe');
+        const filterChassisNumberInput = el('filterChassisNumber');
+        const filterVehicleNameInput = el('filterVehicleName');
+        const filterVehicleColorInput = el('filterVehicleColor');
+        const filterManYearInput = el('filterManYear');
+        const filterCocInput = el('filterCoc');
+        const filterVehicleStatusSelect = el('filterVehicleStatus');
+        const filterActualInventorySelect = el('filterActualInventory');
+        const clearVehicleFiltersButton = el('clearVehicleFilters');
+        const orderChassisNumberInput = el('orderChassisNumberInput');
+        const chassisAutocompleteSuggestions = el('chassisAutocompleteSuggestions');
+
+        // --- UI Helper Functions ---
+        function showSpinner(show = true) { loadingSpinner.style.display = show ? 'block' : 'none'; }
+        function showLoginSpinner(show = true) { loginSpinner.classList.toggle('hidden', !show); loginButton.disabled = show; }
+        function showMessage(message, type = 'success', duration = 3000) { const mb = el('messageBox'); mb.textContent = message; mb.className = `message-box ${type}`; mb.classList.add('show'); setTimeout(() => mb.classList.remove('show'), duration); }
+        function showConfirmationModalDialog(message, onConfirm) { confirmationMessage.textContent = message; confirmationModal.style.display = 'flex'; confirmActionBtn.onclick = () => { confirmationModal.style.display = 'none'; onConfirm(true); }; cancelConfirmBtn.onclick = () => { confirmationModal.style.display = 'none'; onConfirm(false); }; closeConfirmModalBtn.onclick = () => { confirmationModal.style.display = 'none'; onConfirm(false); };}
+
+        // --- Tab Switching and UI Update ---
+        function switchTab(tabName) { Object.values(tabs).forEach(t => { if (t.button) t.button.classList.remove('active'); if (t.content) t.content.classList.add('hidden');}); if (tabs[tabName] && tabs[tabName].button && tabs[tabName].content) { tabs[tabName].button.classList.add('active'); tabs[tabName].content.classList.remove('hidden');} if (tabName === 'vehicles') loadVehicles(); else if (tabName === 'orders') { loadOrders(); loadAvailableVehiclesForOrderForm(); } else if (tabName === 'documents') { loadOrdersForDocumentTab(); loadDocumentTemplates(); } else if (tabName === 'admin') { loadAdminDashboardData(); if (currentUserRole === 'superadmin') loadUsers(); }}
+        
+        function updateUIForRole() {
+            const isAdmin = currentUserRole === 'admin' || currentUserRole === 'superadmin';
+            const isSuperAdmin = currentUserRole === 'superadmin';
+            const isViewer = currentUserRole === 'viewer';
+            console.log("updateUIForRole called. currentUserRole:", currentUserRole, "isAdmin:", isAdmin, "isSuperAdmin:", isSuperAdmin, "isViewer:", isViewer);
+
+            qAll('.admin-only').forEach(elem => {
+                 if (elem.id !== 'tabAdmin' && elem.id !== 'tabDocuments' && !elem.closest('#userManagementSection')) { 
+                     elem.style.display = isAdmin ? '' : 'none';
+                 }
+            });
+            const formElementsToToggle = [
+                ...qAll('#vehicleForm input, #vehicleForm select, #vehicleForm textarea, #vehicleForm button[type="submit"]'),
+                ...qAll('#orderForm input, #orderForm select, #orderForm textarea, #orderForm button[type="submit"]'),
+                el('selectOrderForDoc'), el('selectDocTemplate'), el('generateDocumentButton')
+            ];
+            formElementsToToggle.forEach(e => { if(e) e.disabled = !isAdmin; });
+
+            if (tabs.admin.button) {
+                tabs.admin.button.style.display = isAdmin ? 'inline-flex' : 'none';
+            }
+            if (tabs.documents.button) {
+                 tabs.documents.button.style.display = isAdmin ? 'inline-flex' : 'none';
+            }
+            qAll('.superadmin-only').forEach(e => {
+                e.style.display = isSuperAdmin ? 'block' : 'none';
+            });
+            if (addUserForm) qAll('#addUserForm input, #addUserForm select, #addUserForm button[type="submit"]').forEach(e => e.disabled = !isSuperAdmin);
+            if (vehicleFormCard) {
+                vehicleFormCard.style.display = isViewer ? 'none' : (isAdmin ? 'block' : 'none');
+            }
+            if (orderFormCard) {
+                orderFormCard.style.display = isViewer ? 'none' : (isAdmin ? 'block' : 'none');
+            }
+            if (!isAdmin) {
+                if (currentEditingChassisNumberVehicle) clearVehicleForm();
+                if (currentEditingChassisNumberOrder) clearOrderForm();
+            }
+        }
+
+        // --- Google Script Run ---
+        async function googleScriptRun(functionName, ...args) { showSpinner(); return new Promise((resolve, reject) => { if(typeof google === 'undefined' || !google.script) { reject(new Error("Môi trường Google Script chưa sẵn sàng. Vui lòng thử lại.")); showSpinner(false); return; } google.script.run .withSuccessHandler(response => { showSpinner(false); if (response && response.success === false && response.message) { console.error("Apps Script Error for " + functionName + ":", response.message); reject(new Error(response.message)); } else { resolve(response); } }) .withFailureHandler(error => { showSpinner(false); console.error('Google Script Failure Handler:', functionName, error); reject(error); }) [functionName](...args); });}
+
+        // --- CRUD and other functions (giữ nguyên) ---
+        async function loadVehicles() { try { const d = await googleScriptRun('getVehiclesWithOrders'); displayVehicles(d||[]); filterVehiclesTable(); } catch(e){ showMessage(`Lỗi tải xe: ${e.message||e}`,'error'); displayVehicles([]); } }
+        function displayVehicles(vs) { vehiclesTableBody.innerHTML=''; if(!vs||vs.length===0){noVehiclesMessage.textContent = "Không có xe nào trong kho."; noVehiclesMessage.classList.remove('hidden');return;} noVehiclesMessage.classList.add('hidden'); vs.forEach(v=>{ const r=vehiclesTableBody.insertRow(); r.insertCell().textContent=v["Số Khung"]; r.insertCell().textContent=v["Tên Xe"]; r.insertCell().textContent=v["Màu Sắc"]; r.insertCell().textContent=v["Năm Sản Xuất"]; r.insertCell().textContent=v["Số Máy"]; const ip=parseFloat(v["Giá Nhập"]); r.insertCell().textContent=isNaN(ip)?'':ip.toLocaleString('vi-VN',{style:'currency',currency:'VND'}); const sc=r.insertCell(); const ss=document.createElement('span'); ss.classList.add('status-badge'); ss.textContent=v["Trạng Thái Xe"]||'N/A'; if(v["Trạng Thái Xe"]==="Còn hàng")ss.classList.add('status-con-hang'); else if(v["Trạng Thái Xe"]==="Đã Ghép")ss.classList.add('status-da-ghep'); else if(v["Trạng Thái Xe"]==="Đã bán")ss.classList.add('status-da-ban'); else ss.classList.add('bg-gray-100','text-gray-800'); sc.appendChild(ss); const actualInvCell = r.insertCell(); const actualInvSpan = document.createElement('span'); actualInvSpan.classList.add('status-badge'); if(v.isActualInventory){ actualInvSpan.textContent = "Có"; actualInvSpan.classList.add('status-con-hang');} else { actualInvSpan.textContent = "Không"; actualInvSpan.classList.add('status-da-ban');} actualInvCell.appendChild(actualInvSpan); const ac=r.insertCell(); ac.classList.add('admin-only','space-x-2'); if(currentUserRole==='admin'||currentUserRole==='superadmin'){ const eb=document.createElement('button'); eb.innerHTML=`<i class="fas fa-edit"></i>`; eb.classList.add('btn-outline','px-2','py-1','text-sm'); eb.title="Sửa xe"; eb.onclick=()=>editVehicle(v); ac.appendChild(eb); const db=document.createElement('button'); db.innerHTML=`<i class="fas fa-trash-alt"></i>`; db.classList.add('btn-danger','px-2','py-1','text-sm'); db.title="Xóa xe"; db.onclick=()=>showConfirmationModalDialog(`Xóa xe "${v["Tên Xe"]}"?`, c=>{if(c)deleteVehicleAction(v["Số Khung"])}); ac.appendChild(db);}}); updateUIForRole(); }
+        function editVehicle(v) { currentEditingChassisNumberVehicle=v["Số Khung"]; el('chassisNumber').value=v["Số Khung"]; el('chassisNumber').readOnly=true; el('vehicleName').value=v["Tên Xe"]; el('vehicleColor').value=v["Màu Sắc"]; el('manufacturingYear').value=v["Năm Sản Xuất"]; el('engineNumber').value=v["Số Máy"]; el('importPrice').value=v["Giá Nhập"]; el('vehicleStatus').value=v["Trạng Thái Xe"]; vehicleForm.scrollIntoView({behavior:'smooth'});}
+        async function deleteVehicleAction(cn) { try { const res=await googleScriptRun('deleteVehicle',cn); if(res.success){showMessage(res.message); loadVehicles();loadOrders();loadAvailableVehiclesForOrderForm();loadOrdersForDocumentTab();} else{showMessage(res.message,'error');}} catch(e){showMessage(`Lỗi xóa xe: ${e.message||e}`,'error');}}
+        vehicleForm.addEventListener('submit', async e => { e.preventDefault(); const cn=el('chassisNumber').value.trim(); if(!cn){showMessage("Số Khung là bắt buộc.","error");return;} const vd={"Số Khung":cn, "Tên Xe":el('vehicleName').value.trim(), "Màu Sắc":el('vehicleColor').value.trim(), "Năm Sản Xuất":parseInt(el('manufacturingYear').value)||null, "Số Máy":el('engineNumber').value.trim(), "Giá Nhập":parseFloat(el('importPrice').value)||null, "Trạng Thái Xe":el('vehicleStatus').value}; try { let res; if(currentEditingChassisNumberVehicle){res=await googleScriptRun('updateVehicle',vd);}else{res=await googleScriptRun('addVehicle',vd);} if(res.success){showMessage(res.message);clearVehicleForm();loadVehicles();loadAvailableVehiclesForOrderForm();loadOrdersForDocumentTab();}else{showMessage(res.message,'error');}} catch(e){showMessage(`Lỗi lưu xe: ${e.message||e}`,'error');}});
+        function clearVehicleForm() { vehicleForm.reset(); el('chassisNumber').readOnly=false; currentEditingChassisNumberVehicle=null; el('vehicleStatus').value="Còn hàng";}
+        clearVehicleFormButton.addEventListener('click', clearVehicleForm);
+        async function loadOrders() { try { const d=await googleScriptRun('getVehiclesWithOrders'); const o=d.filter(i=>i&&i["Mã Đơn Hàng"]); displayOrders(o||[]);} catch(e){showMessage(`Lỗi tải đơn hàng: ${e.message||e}`,'error');displayOrders([]);}}
+        function displayOrders(orders) { ordersTableBody.innerHTML = ''; if (!orders || orders.length === 0) { noOrdersMessage.classList.remove('hidden'); return; } noOrdersMessage.classList.add('hidden'); orders.forEach(order => { const row = ordersTableBody.insertRow(); row.insertCell().textContent = order["Số Khung"] || ''; row.insertCell().textContent = order["Tên Xe"] || ''; row.insertCell().textContent = order["Trạng Thái Xe"] || ''; row.insertCell().textContent = order["Mã Đơn Hàng"] || ''; row.insertCell().textContent = order["Tên Khách Hàng"] || ''; row.insertCell().textContent = order["Tư Vấn BH"] || ''; const depositAmt = parseFloat(order["Tiền cọc"]); row.insertCell().textContent = isNaN(depositAmt) ? '' : depositAmt.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }); const finalSalePrice = parseFloat(order["Giá cuối cùng"]); row.insertCell().textContent = isNaN(finalSalePrice) ? '' : finalSalePrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }); row.insertCell().textContent = order["TT Thanh Toán"] || ''; row.insertCell().textContent = order["Ngày Xuất HĐ"] ? new Date(order["Ngày Xuất HĐ"]).toLocaleDateString('vi-VN') : ''; row.insertCell().textContent = order["Ngày DKGN"] ? new Date(order["Ngày DKGN"]).toLocaleDateString('vi-VN') : ''; row.insertCell().textContent = order["Ngày Giao Xe TT"] ? new Date(order["Ngày Giao Xe TT"]).toLocaleDateString('vi-VN') : ''; const actionsCell = row.insertCell(); actionsCell.classList.add('admin-only', 'space-x-2'); if (currentUserRole === 'admin' || currentUserRole === 'superadmin') { const editBtn = document.createElement('button'); editBtn.innerHTML = `<i class="fas fa-edit"></i>`; editBtn.classList.add('btn-outline', 'px-2', 'py-1', 'text-sm'); editBtn.title = "Sửa đơn"; editBtn.onclick = () => editOrder(order); actionsCell.appendChild(editBtn); const clearOrderBtn = document.createElement('button'); clearOrderBtn.innerHTML = `<i class="fas fa-undo"></i>`; clearOrderBtn.classList.add('btn-secondary', 'px-2', 'py-1', 'text-sm'); clearOrderBtn.title = "Xóa đơn"; clearOrderBtn.onclick = () => showConfirmationModalDialog(`Xóa đơn cho xe "${order["Tên Xe"]}"?`, c => { if (c) clearOrderForVehicleAction(order["Số Khung"]) }); actionsCell.appendChild(clearOrderBtn); } }); updateUIForRole(); }
+        async function loadAvailableVehiclesForOrderForm() { try { const d=await googleScriptRun('getVehiclesWithOrders'); allAvailableVehicles = d.filter(v=>(v["Trạng Thái Xe"]==="Còn hàng"||v["Trạng Thái Xe"]==="Đã Ghép")||(currentEditingChassisNumberOrder&&v["Số Khung"]===currentEditingChassisNumberOrder)); }catch(e){showMessage(`Lỗi tải xe cho đơn: ${e.message||e}`,'error');}}
+        function populateOrderFormFields(dataObject) { orderChassisNumberInput.value = dataObject["Số Khung"] || ''; el('orderCode').value=dataObject["Mã Đơn Hàng"]||''; el('vsoCode').value=dataObject["Mã VSO"]||''; el('customerName').value=dataObject["Tên Khách Hàng"]||''; el('customerPhone').value=dataObject["SĐT KH"]||''; el('customerIDNumber').value=dataObject["CCCD/MST KH"]||''; el('customerAddress').value=dataObject["Địa chỉ KH"]||''; el('salesConsultant').value=dataObject["Tư Vấn BH"]||''; el('showroomName').value=dataObject["Tên Showroom"]||''; el('sellingPrice').value=dataObject["Giá Bán"]||''; el('depositAmount').value=dataObject["Tiền cọc"]||''; el('accessoriesPackage').value=dataObject["Gói phụ kiện"]||''; el('discountAmount').value=dataObject["Giảm giá"]||''; el('finalPrice').value=dataObject["Giá cuối cùng"]||''; el('paymentStatus').value=dataObject["TT Thanh Toán"]||''; el('invoiceDate').value=dataObject["Ngày Xuất HĐ"]?new Date(dataObject["Ngày Xuất HĐ"]).toISOString().split('T')[0]:''; el('expectedDisbursementDate').value=dataObject["Ngày DKGN"]?new Date(dataObject["Ngày DKGN"]).toISOString().split('T')[0]:''; el('actualDeliveryDate').value=dataObject["Ngày Giao Xe TT"]?new Date(dataObject["Ngày Giao Xe TT"]).toISOString().split('T')[0]:''; el('orderNotes').value=dataObject["Ghi Chú ĐH"]||'';}
+        function editOrder(o) { currentEditingChassisNumberOrder=o["Số Khung"]; loadAvailableVehiclesForOrderForm().then(()=>{ populateOrderFormFields(o); el('orderCode').readOnly=!!o["Mã Đơn Hàng"]; orderForm.scrollIntoView({behavior:'smooth'});});}
+        async function clearOrderForVehicleAction(cn) { try { const res=await googleScriptRun('clearOrderForVehicle',cn); if(res.success){showMessage(res.message);loadOrders();loadVehicles();loadAvailableVehiclesForOrderForm();}else{showMessage(res.message,'error');}}catch(e){showMessage(`Lỗi xóa đơn: ${e.message||e}`,'error');}}
+        orderForm.addEventListener('submit', async e => { e.preventDefault(); const cn=el('orderChassisNumberInput').value; const oc=el('orderCode').value.trim(); if(!cn){showMessage("Vui lòng chọn hoặc nhập Số Khung.","error");return;} if(el('paymentStatus').value === ""){showMessage("Vui lòng chọn Trạng Thái Thanh Toán.","error");return;} const od={"Số Khung":cn,"Mã Đơn Hàng":oc,"Mã VSO":el('vsoCode').value.trim(),"Tên Khách Hàng":el('customerName').value.trim(),"SĐT KH":el('customerPhone').value.trim(),"CCCD/MST KH":el('customerIDNumber').value.trim(),"Địa chỉ KH":el('customerAddress').value.trim(),"Tư Vấn BH":el('salesConsultant').value.trim(),"Tên Showroom":el('showroomName').value.trim(),"Giá Bán":parseFloat(el('sellingPrice').value)||null,"Tiền cọc":parseFloat(el('depositAmount').value)||null,"Gói phụ kiện":el('accessoriesPackage').value.trim(),"Giảm giá":parseFloat(el('discountAmount').value)||null,"Giá cuối cùng":parseFloat(el('finalPrice').value)||null,"TT Thanh Toán":el('paymentStatus').value,"Ngày Xuất HĐ":el('invoiceDate').value||null,"Ngày DKGN":el('expectedDisbursementDate').value||null,"Ngày Giao Xe TT":el('actualDeliveryDate').value||null,"Ghi Chú ĐH":el('orderNotes').value.trim()}; try { const res=await googleScriptRun('saveOrder',od); if(res.success){showMessage(res.message);clearOrderForm();loadOrders();loadVehicles();loadAvailableVehiclesForOrderForm();}else{showMessage(res.message,'error');}}catch(e){showMessage(`Lỗi lưu đơn: ${e.message||e}`,'error');}});
+        function clearOrderForm() { orderForm.reset(); orderChassisNumberInput.value=""; currentEditingChassisNumberOrder=null; el('orderCode').readOnly=false;}
+        clearOrderFormButton.addEventListener('click', clearOrderForm);
+        async function loadOrdersForDocumentTab() { try { const d=await googleScriptRun('getVehiclesWithOrders'); selectOrderForDoc.innerHTML='<option value="">-- Vui lòng chọn đơn hàng --</option>'; const os=d.filter(i=>i&&i["Mã Đơn Hàng"]); if(os.length===0){const op=document.createElement('option');op.value="";op.textContent="Chưa có đơn hàng nào";op.disabled=true;selectOrderForDoc.appendChild(op);return;} os.forEach(o=>{const op=document.createElement('option');op.value=o["Mã Đơn Hàng"];op.textContent=`${o["Mã Đơn Hàng"]} - KH: ${o["Tên Khách Hàng"]||'N/A'} - Xe: ${o["Tên Xe"]||o["Số Khung"]}`; selectOrderForDoc.appendChild(op);});}catch(e){showMessage(`Lỗi tải danh sách đơn hàng cho tab văn bản: ${e.message||e}`,'error');selectOrderForDoc.innerHTML='<option value="">-- Lỗi tải đơn hàng --</option>';}}
+        async function loadDocumentTemplates() { try { const ts=await googleScriptRun('getDocTemplates'); selectDocTemplate.innerHTML='<option value="">-- Chọn mẫu --</option>'; if(ts&&ts.length>0){ts.forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=t.name; selectDocTemplate.appendChild(o);});}else{selectDocTemplate.innerHTML='<option value="">-- Không có mẫu --</option>';}}catch(e){showMessage(`Lỗi tải mẫu VB: ${e.message||e}`,'error');selectDocTemplate.innerHTML='<option value="">-- Lỗi tải mẫu --</option>';}}
+        generateDocumentButton.addEventListener('click', async () => { const soc=selectOrderForDoc.value; const st=selectDocTemplate.value; if(!soc){showMessage("Vui lòng chọn một đơn hàng.","error");return;} if(!st){showMessage("Vui lòng chọn một mẫu văn bản.","error");return;} generatedDocLinkContainer.innerHTML='<div class="spinner" style="margin:10px 0;"></div> <p class="text-sm text-gray-600">Đang tạo VB...</p>'; try { const res=await googleScriptRun('generateDocument',soc,st); if(res.success){showMessage(res.message||"Tạo VB thành công!"); generatedDocLinkContainer.innerHTML=`<p class="text-green-600 font-semibold">VB đã tạo!</p><a href="${res.docUrl}" target="_blank" class="text-indigo-600 hover:text-indigo-800 underline"><i class="fas fa-external-link-alt mr-1"></i> Mở VB</a><p class="text-xs text-gray-500 mt-1">Lưu ý: VB tạo trong Google Drive.</p>`;}else{showMessage(res.message||"Lỗi tạo VB.","error");generatedDocLinkContainer.innerHTML=`<p class="text-red-600">Lỗi: ${res.message||"Không thể tạo VB."}</p>`;}}catch(e){showMessage(`Lỗi nghiêm trọng khi tạo VB: ${e.message||e}`,'error');generatedDocLinkContainer.innerHTML=`<p class="text-red-600">Lỗi: ${e.message||"Không thể tạo VB."}</p>`;}});
+        async function loadAdminDashboardData() { const ses={totalVehiclesStat:el('totalVehiclesStat'),vehiclesAvailableStat:el('vehiclesAvailableStat'),vehiclesPendingStat:el('vehiclesPendingStat'),vehiclesSoldStat:el('vehiclesSoldStat'),totalOrdersStat:el('totalOrdersStat'),ordersNotDepositedStat:el('ordersNotDepositedStat'),ordersDepositedStat:el('ordersDepositedStat'),ordersPendingDisbursementStat:el('ordersPendingDisbursementStat'),ordersPaidStat:el('ordersPaidStat'),totalRevenueStat:el('totalRevenueStat')}; Object.values(ses).forEach(e=>{if(e)e.textContent='Đang tải...';}); try { const res=await googleScriptRun('getAdminDashboardStats'); if(res&&res.success){ const s=res.data; if(ses.totalVehiclesStat)ses.totalVehiclesStat.textContent=s.totalVehicles||0; if(ses.vehiclesAvailableStat)ses.vehiclesAvailableStat.textContent=s.vehiclesByStatus?.["Còn hàng"]||0; if(ses.vehiclesPendingStat)ses.vehiclesPendingStat.textContent=s.vehiclesByStatus?.["Đã Ghép"]||0; if(ses.vehiclesSoldStat)ses.vehiclesSoldStat.textContent=s.vehiclesByStatus?.["Đã bán"]||0; if(ses.totalOrdersStat)ses.totalOrdersStat.textContent=s.totalOrders||0; if(ses.ordersNotDepositedStat)ses.ordersNotDepositedStat.textContent=s.ordersByPaymentStatus?.["Chưa cọc"]||0; if(ses.ordersDepositedStat)ses.ordersDepositedStat.textContent=s.ordersByPaymentStatus?.["Đã cọc"]||0; if(ses.ordersPendingDisbursementStat)ses.ordersPendingDisbursementStat.textContent=s.ordersByPaymentStatus?.["Đang chờ giải ngân"]||0; if(ses.ordersPaidStat)ses.ordersPaidStat.textContent=s.ordersByPaymentStatus?.["Đã thanh toán"]||0; const rev=parseFloat(s.totalRevenue); if(ses.totalRevenueStat)ses.totalRevenueStat.textContent=isNaN(rev)?'0 VNĐ':rev.toLocaleString('vi-VN',{style:'currency',currency:'VND'});}else{throw new Error(res.message||"Không thể tải dashboard.");}}catch(e){showMessage(`Lỗi tải Admin Dashboard: ${e.message||e}`,'error');Object.values(ses).forEach(el=>{if(el)el.textContent='Lỗi tải';});}}
+        async function loadUsers() { if (currentUserRole !== 'superadmin') return; try { const res = await googleScriptRun('getUsers'); if (res.success) { displayUsers(res.users || []); } else { showMessage(res.message || "Không thể tải danh sách người dùng.", 'error'); displayUsers([]); } } catch (err) { showMessage(`Lỗi tải danh sách người dùng: ${err.message || err.toString()}`, 'error'); displayUsers([]); }}
+        function displayUsers(us) { usersTableBody.innerHTML = ''; const numEl = el('noUsersMessageForAdminList'); if (!us || us.length === 0) { if(numEl) numEl.classList.remove('hidden'); return; } if(numEl) numEl.classList.add('hidden'); us.forEach(u => { const r = usersTableBody.insertRow(); r.insertCell().textContent = u.username; r.insertCell().textContent = u.role; const ac = r.insertCell(); ac.classList.add('space-x-2'); if (u.username === 'superadmin') { ac.textContent = "Không thể sửa/xóa"; } else { const cpb = document.createElement('button'); cpb.innerHTML = `<i class="fas fa-key mr-1"></i> Đổi MK`; cpb.classList.add('btn-outline', 'btn-sm', 'text-xs', 'px-2', 'py-1'); cpb.onclick = () => promptForNewPassword(u.username); ac.appendChild(cpb); const crb = document.createElement('button'); crb.innerHTML = `<i class="fas fa-user-shield mr-1"></i> Đổi Vai Trò`; crb.classList.add('btn-outline', 'btn-sm', 'text-xs', 'px-2', 'py-1'); crb.onclick = () => promptForNewRole(u.username, u.role); ac.appendChild(crb); const dub = document.createElement('button'); dub.innerHTML = `<i class="fas fa-user-times"></i>`; dub.classList.add('btn-danger', 'btn-sm', 'text-xs', 'px-2', 'py-1'); dub.title = "Xóa người dùng"; dub.onclick = () => showConfirmationModalDialog(`Xóa người dùng "${u.username}"?`, c => { if (c) deleteUserAction(u.username); }); ac.appendChild(dub); } });}
+        addUserForm.addEventListener('submit', async (e) => { e.preventDefault(); const nu = newUsernameInput.value.trim(); const np = newPasswordInput.value; const nr = newUserRoleSelect.value; if (!nu || !np || !nr) { showMessage("Vui lòng nhập đầy đủ thông tin người dùng mới.", "error"); return; } if (np.length < 6) { showMessage("Mật khẩu phải có ít nhất 6 ký tự.", "error"); return; } try { const res = await googleScriptRun('addManagedUser', nu, np, nr); if (res.success) { showMessage(res.message); addUserForm.reset(); loadUsers(); } else { showMessage(res.message, 'error'); } } catch (err) { showMessage(`Lỗi thêm người dùng: ${err.message || err.toString()}`, 'error'); }});
+        function promptForNewPassword(username) { const np = prompt(`Nhập mật khẩu mới cho người dùng "${username}":\n(Ít nhất 6 ký tự)`); if (np === null) return; if (np.length < 6) { showMessage("Mật khẩu mới phải có ít nhất 6 ký tự.", "error"); return; } showConfirmationModalDialog( `Bạn có chắc muốn đổi mật khẩu cho người dùng "${username}"?`, async (c) => { if (c) { try { const res = await googleScriptRun('updateManagedUserPassword', username, np); showMessage(res.message, res.success ? 'success' : 'error'); if (res.success) loadUsers(); } catch (err) { showMessage(`Lỗi đổi mật khẩu: ${err.message || err.toString()}`, 'error'); } } }); }
+        function promptForNewRole(username, currentRole) { const nr = prompt(`Nhập vai trò mới cho người dùng "${username}" (hiện tại: ${currentRole}):\n(viewer, admin, superadmin)`, currentRole); if (nr === null) return; if (!['viewer', 'admin', 'superadmin'].includes(nr.toLowerCase())) { showMessage("Vai trò không hợp lệ. Chỉ chấp nhận: viewer, admin, superadmin.", "error"); return; } showConfirmationModalDialog( `Bạn có chắc muốn đổi vai trò cho người dùng "${username}" thành "${nr}"?`, async (c) => { if (c) { try { const res = await googleScriptRun('updateManagedUserRole', username, nr.toLowerCase()); showMessage(res.message, res.success ? 'success' : 'error'); if (res.success) loadUsers(); } catch (err) { showMessage(`Lỗi đổi vai trò: ${err.message || err.toString()}`, 'error'); } } }); }
+        async function deleteUserAction(username) { try { const res = await googleScriptRun('deleteManagedUser', username); showMessage(res.message, res.success ? 'success' : 'error'); if (res.success) loadUsers(); } catch (err) { showMessage(`Lỗi xóa người dùng: ${err.message || err.toString()}`, 'error'); } }
+
+        // --- Authentication & Initial Application Load ---
+        loginButton.addEventListener('click', async () => { const u=usernameInput.value.trim(); const p=passwordInput.value; if(!u||!p){showMessage("Nhập tên và mật khẩu.","error");return;} showLoginSpinner(); try { const res=await googleScriptRun('authenticateUser',u,p); showLoginSpinner(false); if(res.success){currentUserRole=res.role; currentUserDisplay.textContent=`Xin chào, ${u} (${currentUserRole})`; loginPage.classList.add('hidden'); appPage.classList.remove('hidden'); updateUIForRole(); switchTab('vehicles'); if (rememberMeCheckbox.checked) { localStorage.setItem('rememberedUsername', u); } else { localStorage.removeItem('rememberedUsername'); } }else{showMessage(res.message,'error');}}catch(e){showLoginSpinner(false);showMessage(`Lỗi đăng nhập: ${e.message||e}`,'error');}});
+        logoutButton.addEventListener('click', async () => { try { await googleScriptRun('logoutUserOnServer'); } catch (e) { console.error("Lỗi gọi logoutUserOnServer:", e); } currentUserRole=null; currentEditingChassisNumberVehicle=null; currentEditingChassisNumberOrder=null; usernameInput.value=''; if(!rememberMeCheckbox.checked) { usernameInput.value = ''; } passwordInput.value=''; appPage.classList.add('hidden'); loginPage.classList.remove('hidden'); generatedDocLinkContainer.innerHTML=''; showMessage("Đã đăng xuất.");});
+        Object.keys(tabs).forEach(k => { if(tabs[k]&&tabs[k].button)tabs[k].button.addEventListener('click',()=>switchTab(k));});
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const rememberedUser = localStorage.getItem('rememberedUsername');
+            if (rememberedUser) {
+                usernameInput.value = rememberedUser;
+                rememberMeCheckbox.checked = true;
+            }
+            loginPage.classList.remove('hidden');
+            appPage.classList.add('hidden');
+        });
+        
+        // --- Autocomplete and Filter Functions ---
+        orderChassisNumberInput.addEventListener('input', () => { const query = orderChassisNumberInput.value.toLowerCase(); chassisAutocompleteSuggestions.innerHTML = ''; if (query.length === 0) { chassisAutocompleteSuggestions.classList.add('hidden'); return; } const filteredVehicles = allAvailableVehicles.filter(v => v["Số Khung"].toLowerCase().includes(query)); if (filteredVehicles.length > 0) { filteredVehicles.forEach(vehicle => { const item = document.createElement('div'); item.textContent = `${vehicle["Số Khung"]} - ${vehicle["Tên Xe"]} (${vehicle["Trạng Thái Xe"]})`; item.classList.add('autocomplete-item'); item.addEventListener('click', () => { orderChassisNumberInput.value = vehicle["Số Khung"]; chassisAutocompleteSuggestions.classList.add('hidden'); }); chassisAutocompleteSuggestions.appendChild(item); }); chassisAutocompleteSuggestions.classList.remove('hidden'); } else { chassisAutocompleteSuggestions.classList.add('hidden'); }});
+        document.addEventListener('click', (e) => { if (!el('orderChassisNumberInput').contains(e.target)) { chassisAutocompleteSuggestions.classList.add('hidden'); }});
+        function filterVehiclesTable() { const cf=filterChassisNumberInput.value.toLowerCase(),nf=filterVehicleNameInput.value.toLowerCase(),clf=filterVehicleColorInput.value.toLowerCase(),yf=filterManYearInput.value.toLowerCase(),cocf=filterCocInput.value.toLowerCase(),sf=filterVehicleStatusSelect.value.toLowerCase(),aif=filterActualInventorySelect.value.toLowerCase(); const rs=vehiclesTableBody.getElementsByTagName('tr'); let vr=0; for (let i=0;i<rs.length;i++) { const r=rs[i],c=r.getElementsByTagName('td'); if(c.length>7){ const ct=c[0]?c[0].textContent.toLowerCase():'',nt=c[1]?c[1].textContent.toLowerCase():'',clt=c[2]?c[2].textContent.toLowerCase():'',yt=c[3]?c[3].textContent.toLowerCase():'',coct=c[4]?c[4].textContent.toLowerCase():'',ss=c[6]?c[6].querySelector('.status-badge'):null,st=ss?ss.textContent.toLowerCase():'',ais=c[7]?c[7].querySelector('.status-badge'):null,ait=ais?ais.textContent.toLowerCase():''; const cm=ct.includes(cf),nm=nt.includes(nf),clm=clt.includes(clf),ym=yt.includes(yf),cocm=coct.includes(cocf),sm=sf===""||st===sf,aim=aif===""||ait===aif; if(cm&&nm&&clm&&ym&&cocm&&sm&&aim){r.style.display="";vr++;}else{r.style.display="none";}} } if(vr===0&&rs.length>0){noVehiclesMessage.textContent="Không tìm thấy xe nào khớp với bộ lọc."; noVehiclesMessage.classList.remove('hidden');} else if(rs.length===0&&!noVehiclesMessage.classList.contains('hidden')){noVehiclesMessage.textContent="Không có xe nào trong kho.";} else if(vr>0){noVehiclesMessage.classList.add('hidden');}}
+        if(filterChassisNumberInput) filterChassisNumberInput.addEventListener('input', filterVehiclesTable); if(filterVehicleNameInput) filterVehicleNameInput.addEventListener('input', filterVehiclesTable); if(filterVehicleColorInput) filterVehicleColorInput.addEventListener('input', filterVehiclesTable); if(filterManYearInput) filterManYearInput.addEventListener('input', filterVehiclesTable); if(filterCocInput) filterCocInput.addEventListener('input', filterVehiclesTable); if(filterVehicleStatusSelect) filterVehicleStatusSelect.addEventListener('change', filterVehiclesTable); if(filterActualInventorySelect) filterActualInventorySelect.addEventListener('change', filterVehiclesTable);
+        if(clearVehicleFiltersButton) { clearVehicleFiltersButton.addEventListener('click', () => { if(filterChassisNumberInput) filterChassisNumberInput.value = ''; if(filterVehicleNameInput) filterVehicleNameInput.value = ''; if(filterVehicleColorInput) filterVehicleColorInput.value = ''; if(filterManYearInput) filterManYearInput.value = ''; if(filterCocInput) filterCocInput.value = ''; if(filterVehicleStatusSelect) filterVehicleStatusSelect.value = ''; if(filterActualInventorySelect) filterActualInventorySelect.value = ''; filterVehiclesTable(); });}
+    </script>
+</body>
+</html>
